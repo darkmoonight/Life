@@ -23,7 +23,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.example.life"
+    namespace "com.yoshi.life"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
@@ -41,7 +41,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.example.life"
+        applicationId "com.yoshi.life"
         minSdkVersion 23
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
@@ -52,6 +52,11 @@ android {
         release {
             signingConfig signingConfigs.debug
         }
+
+        debug {
+            signingConfig signingConfigs.debug
+            minifyEnabled true
+        }
     }
 }
 
@@ -59,4 +64,6 @@ flutter {
     source '../..'
 }
 
-dependencies {}
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+}
