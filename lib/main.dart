@@ -7,6 +7,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 import 'package:life/app/data/diary.dart';
+import 'package:life/app/modules/home.dart';
+import 'package:life/app/modules/onboarding.dart';
 import 'package:life/theme/theme.dart';
 import 'package:life/theme/theme_controller.dart';
 import 'package:life/translation/translation.dart';
@@ -163,6 +165,7 @@ class _MyAppState extends State<MyApp> {
           supportedLocales:
               appLanguages.map((e) => e['locale'] as Locale).toList(),
           debugShowCheckedModeBanner: false,
+          home: settings.onboard ? const HomePage() : const OnBording(),
         );
       },
     );

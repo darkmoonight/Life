@@ -91,9 +91,9 @@ class _OnBordingState extends State<OnBording> {
 
 class DotIndicator extends StatelessWidget {
   const DotIndicator({
-    Key? key,
+    super.key,
     this.isActive = false,
-  }) : super(key: key);
+  });
 
   final bool isActive;
 
@@ -125,7 +125,7 @@ class Onboard {
 
 final List<Onboard> data = [
   Onboard(
-      image: 'assets/images/Task.png',
+      image: 'assets/images/Diary.png',
       title: 'title1'.tr,
       description: 'subtitle1'.tr),
   Onboard(
