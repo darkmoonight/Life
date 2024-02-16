@@ -1,6 +1,6 @@
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 
 final ThemeData baseLigth = ThemeData.light(useMaterial3: true);
 final ThemeData baseDark = ThemeData.dark(useMaterial3: true);
@@ -10,11 +10,11 @@ const Color darkColor = Color.fromRGBO(30, 30, 30, 1);
 const Color oledColor = Colors.black;
 
 ColorScheme colorSchemeLight = ColorScheme.fromSeed(
-  seedColor: Colors.deepPurple,
+  seedColor: Colors.indigo,
   brightness: Brightness.light,
 );
 ColorScheme colorSchemeDark = ColorScheme.fromSeed(
-  seedColor: Colors.deepPurple,
+  seedColor: Colors.indigo,
   brightness: Brightness.dark,
 );
 
@@ -28,7 +28,7 @@ ThemeData lightTheme(Color? color, ColorScheme? colorScheme) {
           surface: baseLigth.colorScheme.background,
         )
         .harmonized(),
-    textTheme: GoogleFonts.ubuntuTextTheme(baseLigth.textTheme),
+    textTheme: GoogleFonts.getTextTheme('Ubuntu', baseLigth.textTheme),
     appBarTheme: AppBarTheme(
       backgroundColor: color,
       foregroundColor: baseLigth.colorScheme.onSurface,
@@ -54,6 +54,9 @@ ThemeData lightTheme(Color? color, ColorScheme? colorScheme) {
     ),
     navigationBarTheme: baseLigth.navigationBarTheme.copyWith(
       backgroundColor: color,
+      labelTextStyle: MaterialStateProperty.all(
+        const TextStyle(overflow: TextOverflow.ellipsis, fontSize: 12),
+      ),
     ),
     inputDecorationTheme: baseLigth.inputDecorationTheme.copyWith(
       labelStyle: MaterialStateTextStyle.resolveWith(
@@ -61,11 +64,19 @@ ThemeData lightTheme(Color? color, ColorScheme? colorScheme) {
           return const TextStyle(fontSize: 14);
         },
       ),
-      border: InputBorder.none,
-      focusedBorder: InputBorder.none,
-      enabledBorder: InputBorder.none,
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20),
+        borderSide: BorderSide(
+          color: baseLigth.disabledColor,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20),
+        borderSide: BorderSide(
+          color: baseLigth.disabledColor,
+        ),
+      ),
     ),
-    indicatorColor: Colors.black,
   );
 }
 
@@ -79,7 +90,7 @@ ThemeData darkTheme(Color? color, ColorScheme? colorScheme) {
           surface: baseDark.colorScheme.background,
         )
         .harmonized(),
-    textTheme: GoogleFonts.ubuntuTextTheme(baseDark.textTheme),
+    textTheme: GoogleFonts.getTextTheme('Ubuntu', baseDark.textTheme),
     appBarTheme: AppBarTheme(
       backgroundColor: color,
       foregroundColor: baseDark.colorScheme.onSurface,
@@ -105,6 +116,9 @@ ThemeData darkTheme(Color? color, ColorScheme? colorScheme) {
     ),
     navigationBarTheme: baseDark.navigationBarTheme.copyWith(
       backgroundColor: color,
+      labelTextStyle: MaterialStateProperty.all(
+        const TextStyle(overflow: TextOverflow.ellipsis, fontSize: 12),
+      ),
     ),
     inputDecorationTheme: baseDark.inputDecorationTheme.copyWith(
       labelStyle: MaterialStateTextStyle.resolveWith(
@@ -112,9 +126,18 @@ ThemeData darkTheme(Color? color, ColorScheme? colorScheme) {
           return const TextStyle(fontSize: 14);
         },
       ),
-      border: InputBorder.none,
-      focusedBorder: InputBorder.none,
-      enabledBorder: InputBorder.none,
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20),
+        borderSide: BorderSide(
+          color: baseDark.disabledColor,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20),
+        borderSide: BorderSide(
+          color: baseDark.disabledColor,
+        ),
+      ),
     ),
   );
 }

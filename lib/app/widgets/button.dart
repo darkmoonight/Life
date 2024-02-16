@@ -8,7 +8,7 @@ class MyTextButton extends StatelessWidget {
     required this.onPressed,
   });
   final String buttonName;
-  final VoidCallback onPressed;
+  final Function() onPressed;
 
   @override
   Widget build(BuildContext context) {

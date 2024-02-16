@@ -3,9 +3,14 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
+import 'package:time_machine/time_machine.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 import 'package:life/app/data/diary.dart';
 import 'package:life/app/modules/home.dart';
 import 'package:life/app/modules/onboarding.dart';
@@ -14,11 +19,15 @@ import 'package:life/theme/theme_controller.dart';
 import 'package:life/translation/translation.dart';
 import 'package:path_provider/path_provider.dart';
 
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
 late Isar isar;
 late Settings settings;
 
 bool amoledTheme = false;
 bool materialColor = false;
+String timeformat = '24';
 Locale locale = const Locale('en', 'US');
 
 final List appLanguages = [
@@ -27,13 +36,26 @@ final List appLanguages = [
 ];
 
 void main() async {
+  final String timeZoneName;
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(systemNavigationBarColor: Colors.black));
   if (Platform.isAndroid) {
     await setOptimalDisplayMode();
   }
+  if (Platform.isAndroid || Platform.isIOS) {
+    timeZoneName = await FlutterTimezone.getLocalTimezone();
+  } else {
+    timeZoneName = '${DateTimeZone.local}';
+  }
+  tz.initializeTimeZones();
+  tz.setLocalLocation(tz.getLocation(timeZoneName));
   await isarInit();
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+  const InitializationSettings initializationSettings =
+      InitializationSettings(android: initializationSettingsAndroid);
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   runApp(const MyApp());
 }
 
@@ -52,13 +74,11 @@ Future<void> setOptimalDisplayMode() async {
 }
 
 Future<void> isarInit() async {
-  isar = await Isar.open(
-    [
-      SettingsSchema,
-    ],
-    directory: (await getApplicationSupportDirectory()).path,
-  );
+  isar = await Isar.open([
+    SettingsSchema,
+  ], directory: (await getApplicationSupportDirectory()).path);
   settings = isar.settings.where().findFirstSync() ?? Settings();
+
   if (settings.language == null) {
     settings.language = '${Get.deviceLocale}';
     isar.writeTxnSync(() => isar.settings.putSync(settings));
@@ -77,6 +97,7 @@ class MyApp extends StatefulWidget {
     BuildContext context, {
     bool? newAmoledTheme,
     bool? newMaterialColor,
+    String? newTimeformat,
     Locale? newLocale,
   }) async {
     final state = context.findAncestorStateOfType<_MyAppState>()!;
@@ -86,6 +107,9 @@ class MyApp extends StatefulWidget {
     }
     if (newMaterialColor != null) {
       state.changeMarerialTheme(newMaterialColor);
+    }
+    if (newTimeformat != null) {
+      state.changeTimeFormat(newTimeformat);
     }
     if (newLocale != null) {
       state.changeLocale(newLocale);
@@ -111,6 +135,12 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void changeTimeFormat(String newTimeformat) {
+    setState(() {
+      timeformat = newTimeformat;
+    });
+  }
+
   void changeLocale(Locale newLocale) {
     setState(() {
       locale = newLocale;
@@ -121,6 +151,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     amoledTheme = settings.amoledTheme;
     materialColor = settings.materialColor;
+    timeformat = settings.timeformat;
     locale = Locale(
         settings.language!.substring(0, 2), settings.language!.substring(3));
     super.initState();
@@ -128,46 +159,49 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return DynamicColorBuilder(
-      builder: (lightColorScheme, darkColorScheme) {
-        final lightMaterialTheme =
-            lightTheme(lightColorScheme?.surface, lightColorScheme);
-        final darkMaterialTheme =
-            darkTheme(darkColorScheme?.surface, darkColorScheme);
-        final darkMaterialThemeOled = darkTheme(oledColor, darkColorScheme);
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: DynamicColorBuilder(
+        builder: (lightColorScheme, darkColorScheme) {
+          final lightMaterialTheme =
+              lightTheme(lightColorScheme?.surface, lightColorScheme);
+          final darkMaterialTheme =
+              darkTheme(darkColorScheme?.surface, darkColorScheme);
+          final darkMaterialThemeOled = darkTheme(oledColor, darkColorScheme);
 
-        return GetMaterialApp(
-          themeMode: themeController.theme,
-          theme: materialColor
-              ? lightColorScheme != null
-                  ? lightMaterialTheme
-                  : lightTheme(lightColor, colorSchemeLight)
-              : lightTheme(lightColor, colorSchemeLight),
-          darkTheme: amoledTheme
-              ? materialColor
-                  ? darkColorScheme != null
-                      ? darkMaterialThemeOled
-                      : darkTheme(oledColor, colorSchemeDark)
-                  : darkTheme(oledColor, colorSchemeDark)
-              : materialColor
-                  ? darkColorScheme != null
-                      ? darkMaterialTheme
-                      : darkTheme(darkColor, colorSchemeDark)
-                  : darkTheme(darkColor, colorSchemeDark),
-          localizationsDelegates: const [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          translations: Translation(),
-          locale: locale,
-          fallbackLocale: const Locale('en', 'US'),
-          supportedLocales:
-              appLanguages.map((e) => e['locale'] as Locale).toList(),
-          debugShowCheckedModeBanner: false,
-          home: settings.onboard ? const HomePage() : const OnBording(),
-        );
-      },
+          return GetMaterialApp(
+            theme: materialColor
+                ? lightColorScheme != null
+                    ? lightMaterialTheme
+                    : lightTheme(lightColor, colorSchemeLight)
+                : lightTheme(lightColor, colorSchemeLight),
+            darkTheme: amoledTheme
+                ? materialColor
+                    ? darkColorScheme != null
+                        ? darkMaterialThemeOled
+                        : darkTheme(oledColor, colorSchemeDark)
+                    : darkTheme(oledColor, colorSchemeDark)
+                : materialColor
+                    ? darkColorScheme != null
+                        ? darkMaterialTheme
+                        : darkTheme(darkColor, colorSchemeDark)
+                    : darkTheme(darkColor, colorSchemeDark),
+            themeMode: themeController.theme,
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            translations: Translation(),
+            locale: locale,
+            fallbackLocale: const Locale('en', 'US'),
+            supportedLocales:
+                appLanguages.map((e) => e['locale'] as Locale).toList(),
+            debugShowCheckedModeBanner: false,
+            home: settings.onboard ? const HomePage() : const OnBording(),
+          );
+        },
+      ),
     );
   }
 }
