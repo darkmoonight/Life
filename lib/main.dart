@@ -8,6 +8,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
+import 'package:life/utils/device_info.dart';
 import 'package:time_machine/time_machine.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -38,8 +39,7 @@ final List appLanguages = [
 void main() async {
   final String timeZoneName;
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(systemNavigationBarColor: Colors.black));
+  DeviceFeature().init();
   if (Platform.isAndroid) {
     await setOptimalDisplayMode();
   }
@@ -159,33 +159,41 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final edgeToEdgeAvailable = DeviceFeature().isEdgeToEdgeAvailable();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: DynamicColorBuilder(
         builder: (lightColorScheme, darkColorScheme) {
-          final lightMaterialTheme =
-              lightTheme(lightColorScheme?.surface, lightColorScheme);
-          final darkMaterialTheme =
-              darkTheme(darkColorScheme?.surface, darkColorScheme);
-          final darkMaterialThemeOled = darkTheme(oledColor, darkColorScheme);
+          final lightMaterialTheme = lightTheme(
+              lightColorScheme?.surface, lightColorScheme, edgeToEdgeAvailable);
+          final darkMaterialTheme = darkTheme(
+              darkColorScheme?.surface, darkColorScheme, edgeToEdgeAvailable);
+          final darkMaterialThemeOled =
+              darkTheme(oledColor, darkColorScheme, edgeToEdgeAvailable);
 
           return GetMaterialApp(
             theme: materialColor
                 ? lightColorScheme != null
                     ? lightMaterialTheme
-                    : lightTheme(lightColor, colorSchemeLight)
-                : lightTheme(lightColor, colorSchemeLight),
+                    : lightTheme(
+                        lightColor, colorSchemeLight, edgeToEdgeAvailable)
+                : lightTheme(lightColor, colorSchemeLight, edgeToEdgeAvailable),
             darkTheme: amoledTheme
                 ? materialColor
                     ? darkColorScheme != null
                         ? darkMaterialThemeOled
-                        : darkTheme(oledColor, colorSchemeDark)
-                    : darkTheme(oledColor, colorSchemeDark)
+                        : darkTheme(
+                            oledColor, colorSchemeDark, edgeToEdgeAvailable)
+                    : darkTheme(oledColor, colorSchemeDark, edgeToEdgeAvailable)
                 : materialColor
                     ? darkColorScheme != null
                         ? darkMaterialTheme
-                        : darkTheme(darkColor, colorSchemeDark)
-                    : darkTheme(darkColor, colorSchemeDark),
+                        : darkTheme(
+                            darkColor, colorSchemeDark, edgeToEdgeAvailable)
+                    : darkTheme(
+                        darkColor, colorSchemeDark, edgeToEdgeAvailable),
             themeMode: themeController.theme,
             localizationsDelegates: const [
               GlobalMaterialLocalizations.delegate,

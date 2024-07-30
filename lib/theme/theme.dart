@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 
@@ -18,14 +19,14 @@ ColorScheme colorSchemeDark = ColorScheme.fromSeed(
   brightness: Brightness.dark,
 );
 
-ThemeData lightTheme(Color? color, ColorScheme? colorScheme) {
+ThemeData lightTheme(
+    Color? color, ColorScheme? colorScheme, bool edgeToEdgeAvailable) {
   return baseLigth.copyWith(
     brightness: Brightness.light,
     colorScheme: colorScheme
         ?.copyWith(
           brightness: Brightness.light,
-          background: color,
-          surface: baseLigth.colorScheme.background,
+          surface: baseLigth.colorScheme.surface,
         )
         .harmonized(),
     textTheme: GoogleFonts.getTextTheme('Ubuntu', baseLigth.textTheme),
@@ -35,12 +36,24 @@ ThemeData lightTheme(Color? color, ColorScheme? colorScheme) {
       shadowColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarIconBrightness: Brightness.dark,
+        statusBarColor: Colors.transparent,
+        systemStatusBarContrastEnforced: false,
+        systemNavigationBarContrastEnforced: false,
+        systemNavigationBarDividerColor: Colors.transparent,
+        systemNavigationBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor:
+            edgeToEdgeAvailable ? Colors.transparent : colorScheme?.surface,
+      ),
     ),
     primaryColor: color,
     canvasColor: color,
     scaffoldBackgroundColor: color,
     cardTheme: baseLigth.cardTheme.copyWith(
       color: color,
+      surfaceTintColor:
+          color == oledColor ? Colors.transparent : colorScheme?.surfaceTint,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
@@ -48,19 +61,20 @@ ThemeData lightTheme(Color? color, ColorScheme? colorScheme) {
     ),
     bottomSheetTheme: baseLigth.bottomSheetTheme.copyWith(
       backgroundColor: color,
+      surfaceTintColor:
+          color == oledColor ? Colors.transparent : colorScheme?.surfaceTint,
     ),
     navigationRailTheme: baseLigth.navigationRailTheme.copyWith(
       backgroundColor: color,
     ),
     navigationBarTheme: baseLigth.navigationBarTheme.copyWith(
       backgroundColor: color,
-      labelTextStyle: MaterialStateProperty.all(
-        const TextStyle(overflow: TextOverflow.ellipsis, fontSize: 12),
-      ),
+      surfaceTintColor:
+          color == oledColor ? Colors.transparent : colorScheme?.surfaceTint,
     ),
     inputDecorationTheme: baseLigth.inputDecorationTheme.copyWith(
-      labelStyle: MaterialStateTextStyle.resolveWith(
-        (Set<MaterialState> states) {
+      labelStyle: WidgetStateTextStyle.resolveWith(
+        (Set<WidgetState> states) {
           return const TextStyle(fontSize: 14);
         },
       ),
@@ -80,29 +94,41 @@ ThemeData lightTheme(Color? color, ColorScheme? colorScheme) {
   );
 }
 
-ThemeData darkTheme(Color? color, ColorScheme? colorScheme) {
+ThemeData darkTheme(
+    Color? color, ColorScheme? colorScheme, bool edgeToEdgeAvailable) {
   return baseDark.copyWith(
     brightness: Brightness.dark,
     colorScheme: colorScheme
         ?.copyWith(
           brightness: Brightness.dark,
-          background: color,
-          surface: baseDark.colorScheme.background,
+          surface: baseDark.colorScheme.surface,
         )
         .harmonized(),
-    textTheme: GoogleFonts.getTextTheme('Ubuntu', baseDark.textTheme),
+    textTheme: GoogleFonts.ubuntuTextTheme(baseDark.textTheme),
     appBarTheme: AppBarTheme(
       backgroundColor: color,
       foregroundColor: baseDark.colorScheme.onSurface,
       shadowColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarIconBrightness: Brightness.light,
+        statusBarColor: Colors.transparent,
+        systemStatusBarContrastEnforced: false,
+        systemNavigationBarContrastEnforced: false,
+        systemNavigationBarDividerColor: Colors.transparent,
+        systemNavigationBarIconBrightness: Brightness.light,
+        systemNavigationBarColor:
+            edgeToEdgeAvailable ? Colors.transparent : colorScheme?.surface,
+      ),
     ),
     primaryColor: color,
     canvasColor: color,
     scaffoldBackgroundColor: color,
     cardTheme: baseDark.cardTheme.copyWith(
       color: color,
+      surfaceTintColor:
+          color == oledColor ? Colors.transparent : colorScheme?.surfaceTint,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
@@ -110,34 +136,26 @@ ThemeData darkTheme(Color? color, ColorScheme? colorScheme) {
     ),
     bottomSheetTheme: baseDark.bottomSheetTheme.copyWith(
       backgroundColor: color,
+      surfaceTintColor:
+          color == oledColor ? Colors.transparent : colorScheme?.surfaceTint,
     ),
     navigationRailTheme: baseDark.navigationRailTheme.copyWith(
       backgroundColor: color,
     ),
     navigationBarTheme: baseDark.navigationBarTheme.copyWith(
       backgroundColor: color,
-      labelTextStyle: MaterialStateProperty.all(
-        const TextStyle(overflow: TextOverflow.ellipsis, fontSize: 12),
-      ),
+      surfaceTintColor:
+          color == oledColor ? Colors.transparent : colorScheme?.surfaceTint,
     ),
     inputDecorationTheme: baseDark.inputDecorationTheme.copyWith(
-      labelStyle: MaterialStateTextStyle.resolveWith(
-        (Set<MaterialState> states) {
+      labelStyle: WidgetStateTextStyle.resolveWith(
+        (Set<WidgetState> states) {
           return const TextStyle(fontSize: 14);
         },
       ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide(
-          color: baseDark.disabledColor,
-        ),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide(
-          color: baseDark.disabledColor,
-        ),
-      ),
+      border: InputBorder.none,
+      focusedBorder: InputBorder.none,
+      enabledBorder: InputBorder.none,
     ),
   );
 }
